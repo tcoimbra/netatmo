@@ -110,10 +110,10 @@ class WeatherStation:
     class to access data
     """
 
-    def __init__(self, configuration=None):
-        self._access_token = None
-        self._refresh_token = None
-        self._expiration = None
+    def __init__(self, configuration=None, access_token=None, refresh_token=None, expiration=None):
+        self._access_token = access_token
+        self._refresh_token = refresh_token
+        self._expiration = expiration
 
         self.auth(None, None, None, None)
         self.default_device_id = None
@@ -136,15 +136,20 @@ class WeatherStation:
             self.load_credentials()
             self.load_tokens()
 
-    def auth(self, client_id, client_secret, username, password):
+    def auth(self, client_id, client_secret, username=None, password=None, access_token=None, refresh_token=None, expiration=None):
         """
         set credentials
         """
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.username = username
-        self.password = password
-        self._access_token = None
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._access_token = access_token or self._access_token
+        self._refresh_token = refresh_token or self._refresh_token
+        self._expiration = expiration or self._expiration
+
+        if not self._access_token:
+            if not username or not password:
+                raise ValueError("Username and password are required if no access token is provided.")
+
 
     def load_credentials(self):
         """
@@ -276,7 +281,7 @@ class WeatherStation:
             self.save_tokens()
             trace(1, _AUTH_REQ, post_params, resp)
 
-        elif self._expiration <= time.time():
+        elif self._expiration <= time.time() or not self._access_token:
             # Token should be renewed
 
             post_params = {
