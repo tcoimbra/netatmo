@@ -148,17 +148,17 @@ class WeatherStation:
         self._access_token = access_token or self._access_token
         self._refresh_token = refresh_token or self._refresh_token
         self._expiration = expiration or self._expiration
-
+    
         if not self._access_token:
             if not username or not password:
                 raise ValueError("Username and password are required if no access token is provided.")
-
+    
             post_params = {
                 "grant_type": "password",
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "username": self.username,
-                "password": self.password,
+                "client_id": client_id,  # changed from self.client_id
+                "client_secret": client_secret,  # changed from self.client_secret
+                "username": username,  # changed from self.username
+                "password": password,  # changed from self.password
                 "scope": "read_station",
             }
             resp = post_request(_AUTH_REQ, post_params)
@@ -167,12 +167,13 @@ class WeatherStation:
             if "error" in resp:
                 print("error", resp["error"], _AUTH_REQ)
                 return None
-
+    
             self._access_token = resp["access_token"]
             self._refresh_token = resp["refresh_token"]
             self._expiration = resp["expires_in"] + time.time()
             self.save_tokens()
             trace(1, _AUTH_REQ, post_params, resp)
+
 
 
 
