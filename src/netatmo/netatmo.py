@@ -212,7 +212,7 @@ class WeatherStation:
             config.read(rc)
         if not config.has_section("netatmo"):
             config.add_section("netatmo")
-        config["netatmo"]["client_id"] = str(self.client_id)
+        config["netatmo"]["client_id"] = str(self._client_id)
         config["netatmo"]["client_secret"] = str(self.client_secret)
         config["netatmo"]["username"] = str(self.username)
         config["netatmo"]["password"] = str(self.password)
@@ -283,7 +283,7 @@ class WeatherStation:
             post_params = {
                 "grant_type": "refresh_token",
                 "refresh_token": self._refresh_token,
-                "client_id": self.client_id,
+                "client_id": self._client_id,
                 "client_secret": self.client_secret,
             }
             resp = post_request(_AUTH_REQ, post_params)
