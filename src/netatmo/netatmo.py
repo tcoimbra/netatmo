@@ -150,6 +150,28 @@ class WeatherStation:
             if not username or not password:
                 raise ValueError("Username and password are required if no access token is provided.")
 
+            post_params = {
+                "grant_type": "password",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "username": self.username,
+                "password": self.password,
+                "scope": "read_station",
+            }
+            resp = post_request(_AUTH_REQ, post_params)
+            if resp is None:
+                return False
+            if "error" in resp:
+                print("error", resp["error"], _AUTH_REQ)
+                return None
+
+            self._access_token = resp["access_token"]
+            self._refresh_token = resp["refresh_token"]
+            self._expiration = resp["expires_in"] + time.time()
+            self.save_tokens()
+            trace(1, _AUTH_REQ, post_params, resp)
+
+
 
     def load_credentials(self):
         """
@@ -253,37 +275,7 @@ class WeatherStation:
         if self.client_id is None or self.client_secret is None:
             return None
 
-        if self._access_token is None:
-            # We should authenticate
-
-            if self.username is None or self.password is None:
-                return None
-
-            post_params = {
-                "grant_type": "password",
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "username": self.username,
-                "password": self.password,
-                "scope": "read_station",
-            }
-            resp = post_request(_AUTH_REQ, post_params)
-            if resp is None:
-                return False
-            if "error" in resp:
-                print("error", resp["error"], _AUTH_REQ)
-                return None
-
-            self._access_token = resp["access_token"]
-            self._refresh_token = resp["refresh_token"]
-            self._expiration = resp["expires_in"] + time.time()
-            # self._scope = resp['scope']
-            self.save_tokens()
-            trace(1, _AUTH_REQ, post_params, resp)
-
-        elif self._expiration <= time.time() or not self._access_token:
-            # Token should be renewed
-
+        if self._access_token is None or self._expiration <= time.time():
             post_params = {
                 "grant_type": "refresh_token",
                 "refresh_token": self._refresh_token,
@@ -307,6 +299,7 @@ class WeatherStation:
             trace(2, "access_token still valid")
 
         return self._access_token
+
 
     def get_data(self, device_id=None):
         """
