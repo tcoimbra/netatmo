@@ -115,7 +115,9 @@ class WeatherStation:
         self._refresh_token = refresh_token
         self._expiration = expiration
 
-        self.auth(None, None, None, None)
+        # The line below has been removed
+        # self.auth(None, None, None, None)
+
         self.default_device_id = None
         self.user = None
         self.devices = None
@@ -135,6 +137,7 @@ class WeatherStation:
         if self.rc_file:
             self.load_credentials()
             self.load_tokens()
+
 
     def auth(self, client_id, client_secret, username=None, password=None, access_token=None, refresh_token=None, expiration=None):
         """
