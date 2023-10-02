@@ -276,7 +276,7 @@ class WeatherStation:
         """
         refresh if necessary and return the access_token
         """
-        if self.client_id is None or self.client_secret is None:
+        if self._client_id is None or self._client_secret is None:
             return None
 
         if self._access_token is None or self._expiration <= time.time():
